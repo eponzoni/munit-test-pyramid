@@ -1,0 +1,15 @@
+{
+  "configs": [
+    "sys-heavy-metal-bands-api.xml"
+  ],
+  "minMuleVersion": "4.2.2-hf2",
+  "name": "sys-heavy-metal-bands-api",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedResources": [
+        "sql/iag-products.sql"
+      ]
+    }
+  }
+}

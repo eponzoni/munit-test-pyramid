@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<munit:config name="sys-heavy-metal-bands-test-suite.xml" />
+	<munit:test name="sys-heavy-metal-bands-test__UnitTest_xml_to_json.dwl" doc:id="cdd1d8b4-a634-43b5-ac6f-0cdb68155b4b" >
+		<munit:execution >
+			<set-payload value='#[%dw 2.0
+output application/java
+---
+readUrl("classpath://examples/java_bands.json", "application/json")]' doc:name="List of Bands" doc:id="fcfb0387-4ae8-4633-a577-cba0513c2ffc"/>
+			<ee:transform doc:name="Java Collection to JSON" doc:id="e71e1bb9-39dc-4f4d-a8a0-94a8ef3cb078" >
+				<ee:message >
+					<ee:set-payload resource="dw/javaCollection_to_json.dwl" />
+				</ee:message>
+			</ee:transform>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Collection contains 1 or more bands" doc:id="2cd6a0eb-23d3-46ea-8d9a-6b2edb7f8cac" is="#[MunitTools::equalTo(true)]" expression="#[sizeOf(payload) &gt;= 1]" message="Invalid size of collection of heavy metal bands"/>
+			<munit-tools:assert-that doc:name="Collection contains band with name Sepultura" doc:id="21198220-85c8-486c-9d77-c94b2e7343a6" expression='#[payload filter ($.name == "Sepultura")]' is='#[MunitTools::notNullValue()]' message='Collection does not contain band "Sepultura"'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="sys-heavy-metal-bands-test__ComponentTest_getHeavyMetalBandsFlow" doc:id="056d2eaf-e7a8-4de7-8512-007bfb473f51" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="List of Heavy Metal Bands DB Select)" doc:id="fa1c5253-a977-49e7-a2e9-a6f1cceea669" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="List of Heavy Metal Bands" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[
+%dw 2.0
+output application/java
+---
+readUrl("classpath://examples/java_bands.json", "application/json")
+]' mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\bands:sys-heavy-metal-bands-api-config" doc:id="8ec683f9-445b-41f0-8be8-6fe0d18a70af" name="get:\bands:sys-heavy-metal-bands-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="JSON Collection is not Empty" doc:id="4611b6d4-c00c-41c1-91cc-49da8bc83bfd" message="Invalid payload" expression="#[payload]" is="#[MunitTools::not(MunitTools::isEmpty())]"/>
+			<munit-tools:assert-that doc:name="First Heavy Metal Band is Angra" doc:id="c7ef6c29-2a60-44a7-bd32-5d1a3ddd6bb4" expression="#[payload[0].name]" is='#[MunitTools::equalTo("Angra")]'/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

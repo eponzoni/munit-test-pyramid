@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: Heavy Metal Bands System API
+description: Heavy Metal Bands System API
+version: v1
+mediaType: 
+  - application/json
+protocols:
+  - HTTP
+/bands:
+  displayName: Heavy Metal Bands
+  description: Collection of Heavy Metal Bands
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Iron Maiden"
